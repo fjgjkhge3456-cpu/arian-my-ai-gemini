@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>هوش مصنوعی اختصاصی</title>
+    <style>
+        * { box-sizing: border-box; font-family: Tahoma, sans-serif; }
+        body { background: #f0f2f5; margin: 0; display: flex; justify-content: center; height: 100vh; }
+        .chat-container { width: 100%; max-width: 480px; background: #fff; display: flex; flex-direction: column; height: 100vh; }
+        .header { background: #075e54; color: #fff; padding: 15px; text-align: center; font-weight: bold; }
+        .messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+        .user { background: #dcf8c6; align-self: flex-end; }
+        .bot { background: #f1f0f0; align-self: flex-start; }
+        .input-box { display: flex; padding: 10px; background: #eee; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 8px; outline: none; }
+        button { margin-right: 8px; padding: 10px 16px; background: #075e54; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">🤖 چت با هوش مصنوعی اختصاصی</div>
+        <div class="messages" id="chat"></div>
+        <div class="input-box">
+            <input type="text" id="userInput" placeholder="پیام بنویسید..." onkeydown="if(event.key==='Enter') sendMsg()">
+            <button onclick="sendMsg()">ارسال</button>
+        </div>
+    </div>
+
+    <script>
+        // ⚠️ آدرس سرور رندر خود را دقیقاً جایگزین لینک زیر کنید:
+        const API_URL = "https://arian-ai-app.onrender.com/api/chat";
+
+        async function sendMsg() {
+            const input = document.getElementById('userInput');
+            const chat = document.getElementById('chat');
+            const text = input.value.trim();
+            if (!text) return;
+
+            chat.innerHTML += `<div class="msg user">${text}</div>`;
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'msg bot';
+            loadingDiv.innerText = 'در حال پاسخ... ⏳';
+            chat.appendChild(loadingDiv);
+            chat.scrollTop = chat.scrollHeight;
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await res.json();
+                loadingDiv.innerText = data.response || "⚠️ خطایی رخ داد.";
+            } catch (err) {
+                loadingDiv.innerText = "❌ خطا در ارتباط با سرور.";
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
+    </script>
+</body>
+</html>
